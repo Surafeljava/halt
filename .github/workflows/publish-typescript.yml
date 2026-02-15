@@ -1,0 +1,91 @@
+name: Publish TypeScript Package to npm
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (leave empty to use package.json version)'
+        required: false
+        type: string
+      tag:
+        description: 'npm tag (latest, beta, next)'
+        required: false
+        default: 'latest'
+        type: choice
+        options:
+          - latest
+          - beta
+          - next
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/halt
+    permissions:
+      contents: read
+      id-token: write  # Required for provenance
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+          cache-dependency-path: packages/typescript/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: packages/typescript
+        run: npm ci
+      
+      - name: Update version (if specified)
+        if: github.event.inputs.version != ''
+        working-directory: packages/typescript
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+      
+      - name: Build package
+        working-directory: packages/typescript
+        run: npm run build
+      
+      - name: Run tests
+        working-directory: packages/typescript
+        run: npm test
+      
+      - name: Publish to npm (manual dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        working-directory: packages/typescript
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm publish --tag ${{ github.event.inputs.tag || 'latest' }} --provenance --access public
+      
+      - name: Publish to npm (release)
+        if: github.event_name == 'release'
+        working-directory: packages/typescript
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm publish --provenance --access public
+      
+      - name: Create tarball for GitHub Release
+        if: github.event_name == 'release'
+        working-directory: packages/typescript
+        run: npm pack
+      
+      - name: Upload to GitHub Release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: packages/typescript/halt-*.tgz
+          asset_name: halt-typescript-${{ github.event.release.tag_name }}.tgz
+          asset_content_type: application/gzip

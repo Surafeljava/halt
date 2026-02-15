@@ -1,0 +1,60 @@
+name: Test TypeScript Package
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'packages/typescript/**'
+      - '.github/workflows/test-typescript.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'packages/typescript/**'
+      - '.github/workflows/test-typescript.yml'
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: ['18', '20', '21']
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: packages/typescript/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: packages/typescript
+        run: npm ci
+      
+      - name: Lint
+        working-directory: packages/typescript
+        run: npm run lint
+        continue-on-error: true
+      
+      - name: Type check
+        working-directory: packages/typescript
+        run: npm run type-check
+        continue-on-error: true
+      
+      - name: Build
+        working-directory: packages/typescript
+        run: npm run build
+      
+      - name: Run tests
+        working-directory: packages/typescript
+        run: npm test -- --coverage
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: packages/typescript/coverage/coverage-final.json
+          flags: typescript
+          name: typescript-${{ matrix.node-version }}-${{ matrix.os }}
