@@ -1,8 +1,6 @@
-<p align="center">
-    <img src="assets/logo-small.png" alt="Halt logo" width="64" height="64">
-</p>
-# Halt
+<img width="100" height="100" alt="Halt logo" src="https://github.com/user-attachments/assets/53536c8e-c7a5-490e-b21e-2501887ad92c" />
 
+# Halt [Rate Limitter]
 Halt is a lightweight rate limiting middleware library for services and APIs. It's
 designed to be easy to plug into frameworks (Express, Next, FastAPI, Flask, Django)
 and flexible enough for SaaS use-cases (per-user / plan-based limits).
