@@ -25,6 +25,14 @@ Features
 - Algorithm instance caching per policy name
 - In-memory and pluggable distributed stores (Redis recommended for production)
 
+Storage Backends (explicit)
+- InMemory (development): `packages/typescript/src/stores/memory.ts`, `packages/python/halt/stores/memory.py`
+- PostgreSQL (production, ACID): `packages/typescript/src/stores/postgres.ts`, `packages/python/halt/stores/postgres.py`
+- MongoDB (production, TTL indexes): `packages/typescript/src/stores/mongodb.ts`, `packages/python/halt/stores/mongodb.py`
+- DynamoDB (AWS serverless): `packages/typescript/src/stores/dynamodb.ts` (Python: `packages/python/examples/postgres_example.py` shows usage)
+- Memcached (distributed cache): `packages/typescript/src/stores/memcached.ts`
+- Redis (recommended distributed store): Redis support is planned/partially stubbed in docs; implement a `RedisStore` backing with atomic ops for strict global limits (I can add this next).
+
 Getting started (TypeScript)
 
 1. Install dev deps and run tests
@@ -62,6 +70,7 @@ Roadmap (short)
 - Improve distributed store implementations (Redis Lua scripts)
 - Add idempotent response middleware (optional)
 - Expand dashboards and metrics exporters
+- GraphQL support (Apollo / Graphene adapters included)
 
 If you'd like, I can add a Redis `Store` implementation and full idempotency middleware next.
 
