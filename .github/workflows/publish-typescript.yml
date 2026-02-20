@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: npm
-      url: https://www.npmjs.com/package/halt
+      url: https://www.npmjs.com/package/halt-rate
     permissions:
       contents: read
       id-token: write  # Required for provenance

@@ -1,5 +1,5 @@
 {
-  "name": "halt",
+  "name": "halt-rate",
   "version": "0.1.0",
   "description": "Drop-in middleware that enforces consistent rate limits with safe defaults and Redis-backed accuracy",
   "main": "dist/index.js",
