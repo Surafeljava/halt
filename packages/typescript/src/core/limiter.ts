@@ -252,7 +252,7 @@ export class RateLimiter {
         }
 
         // Check custom exemptions
-        if (path && policy.exemptions.includes(path)) {
+        if (path && (policy.exemptions ?? []).includes(path)) {
             return true;
         }
 
@@ -266,7 +266,7 @@ export class RateLimiter {
 
         // Check IP exemptions
         const ip = extractIp(request, this.trustedProxies);
-        if (ip && policy.exemptions.includes(ip)) {
+        if (ip && (policy.exemptions ?? []).includes(ip)) {
             return true;
         }
 
