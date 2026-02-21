@@ -2,7 +2,7 @@
 
 from typing import Optional, Callable
 from functools import wraps
-from flask import request, jsonify, make_response
+from flask import request, jsonify, make_response, g
 from halt.core.limiter import RateLimiter
 
 
@@ -32,6 +32,7 @@ class HaltFlask:
         @app.before_request
         def check_rate_limit():
             decision = self.limiter.check(request)
+            g._halt_decision = decision
             
             if not decision.allowed:
                 response = make_response(
@@ -49,10 +50,11 @@ class HaltFlask:
         @app.after_request
         def add_rate_limit_headers(response):
             # Add headers if not already added (i.e., request was allowed)
-            if response.status_code != 429:
+            decision = getattr(g, "_halt_decision", None)
+            if decision is None:
                 decision = self.limiter.check(request)
-                for key, value in decision.to_headers().items():
-                    response.headers[key] = value
+            for key, value in decision.to_headers().items():
+                response.headers[key] = value
             return response
 
 
